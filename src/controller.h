@@ -28,7 +28,7 @@ class Controller {
     Controller(int channel, const Config &config, const Timing &timing);
 #endif  // THERMAL
     void ClockTick();
-    bool WillAcceptTransaction(uint64_t hex_addr, bool is_write) const;
+    bool WillAcceptTransaction(uint64_t hex_addr, int is_write) const;
     bool AddTransaction(Transaction trans);
     int QueueUsage() const;
     // Stats output

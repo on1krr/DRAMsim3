@@ -120,14 +120,15 @@ JedecDRAMSystem::~JedecDRAMSystem() {
 }
 
 bool JedecDRAMSystem::WillAcceptTransaction(uint64_t hex_addr,
-                                            bool is_write) const {
+                                            int is_write) const {
     int channel = GetChannel(hex_addr);
     return ctrls_[channel]->WillAcceptTransaction(hex_addr, is_write);
 }
 
-bool JedecDRAMSystem::AddTransaction(uint64_t hex_addr, bool is_write) {
+bool JedecDRAMSystem::AddTransaction(uint64_t hex_addr, int is_write) {
 // Record trace - Record address trace for debugging or other purposes
 #ifdef ADDR_TRACE
+//JAG this need to be updated with switch statement
     address_trace_ << std::hex << hex_addr << std::dec << " "
                    << (is_write ? "WRITE " : "READ ") << clk_ << std::endl;
 #endif
@@ -177,7 +178,7 @@ IdealDRAMSystem::IdealDRAMSystem(Config &config, const std::string &output_dir,
 
 IdealDRAMSystem::~IdealDRAMSystem() {}
 
-bool IdealDRAMSystem::AddTransaction(uint64_t hex_addr, bool is_write) {
+bool IdealDRAMSystem::AddTransaction(uint64_t hex_addr, int is_write) {
     auto trans = Transaction(hex_addr, is_write);
     trans.added_cycle = clk_;
     infinite_buffer_q_.push_back(trans);
@@ -188,9 +189,13 @@ void IdealDRAMSystem::ClockTick() {
     for (auto trans_it = infinite_buffer_q_.begin();
          trans_it != infinite_buffer_q_.end();) {
         if (clk_ - trans_it->added_cycle >= static_cast<uint64_t>(latency_)) {
-            if (trans_it->is_write) {
+	//JAG this certainly needs to be fixed
+            //if (trans_it->is_write) {
+            if (trans_it->is_write > 0) {
+                std::cerr << "In Write" << std::endl;
                 write_callback_(trans_it->addr);
             } else {
+                std::cerr << "In Read" << std::endl;
                 read_callback_(trans_it->addr);
             }
             trans_it = infinite_buffer_q_.erase(trans_it++);

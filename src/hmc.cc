@@ -328,7 +328,7 @@ inline void HMCMemorySystem::IterateNextLink() {
 }
 
 bool HMCMemorySystem::WillAcceptTransaction(uint64_t hex_addr,
-                                            bool is_write) const {
+                                            int is_write) const {
     bool insertable = false;
     for (auto link_queue = link_req_queues_.begin();
          link_queue != link_req_queues_.end(); link_queue++) {
@@ -340,10 +340,11 @@ bool HMCMemorySystem::WillAcceptTransaction(uint64_t hex_addr,
     return insertable;
 }
 
-bool HMCMemorySystem::AddTransaction(uint64_t hex_addr, bool is_write) {
+bool HMCMemorySystem::AddTransaction(uint64_t hex_addr, int is_write) {
     // to be compatible with other protocol we have this interface
     // when using this intreface the size of each transaction will be block_size
     HMCReqType req_type;
+    //JAG this woul dned to be updated for HMC system
     if (is_write) {
         switch (config_.block_size) {
             case 0:

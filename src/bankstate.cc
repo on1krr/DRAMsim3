@@ -36,7 +36,11 @@ Command BankState::GetReadyCommand(const Command& cmd, uint64_t clk) const {
                     required_type = cmd.cmd_type;
                     break;
                 default:
-                    std::cerr << "Unknown type!" << std::endl;
+                    //printf("%s\n",item.first.c_str(cmd.cmd_type));
+                    //std::cerr << cmd.cmd_type << std::string << std::endl;
+                    //std::cerr << &cmd.cmd_type << std::endl;
+                    //std::ostream << const dramsim3::BankState::State << std::endl;
+                    std::cerr << "In bankstate Closed - Unknown type!" << std::endl;
                     AbruptExit(__FILE__, __LINE__);
                     break;
             }
@@ -59,7 +63,7 @@ Command BankState::GetReadyCommand(const Command& cmd, uint64_t clk) const {
                     required_type = CommandType::PRECHARGE;
                     break;
                 default:
-                    std::cerr << "Unknown type!" << std::endl;
+                    std::cerr << "In bankstate Open - Unknown type!" << std::endl;
                     AbruptExit(__FILE__, __LINE__);
                     break;
             }
@@ -73,7 +77,7 @@ Command BankState::GetReadyCommand(const Command& cmd, uint64_t clk) const {
                     required_type = CommandType::SREF_EXIT;
                     break;
                 default:
-                    std::cerr << "Unknown type!" << std::endl;
+                    std::cerr << "In bankstate SREF - Unknown type!" << std::endl;
                     AbruptExit(__FILE__, __LINE__);
                     break;
             }

@@ -148,10 +148,10 @@ void Controller::ClockTick() {
     return;
 }
 
-bool Controller::WillAcceptTransaction(uint64_t hex_addr, bool is_write) const {
+bool Controller::WillAcceptTransaction(uint64_t hex_addr, int is_write) const {
     if (is_unified_queue_) {
         return unified_queue_.size() < unified_queue_.capacity();
-    } else if (!is_write) {
+    } else if (is_write < 0) {
         return read_queue_.size() < read_queue_.capacity();
     } else {
         return write_buffer_.size() < write_buffer_.capacity();
@@ -163,7 +163,8 @@ bool Controller::AddTransaction(Transaction trans) {
     simple_stats_.AddValue("interarrival_latency", clk_ - last_trans_clk_);
     last_trans_clk_ = clk_;
 
-    if (trans.is_write) {
+    if (trans.is_write > 0) {
+        std::cerr << "Controller is adding a WRITE" << std::endl;
         if (pending_wr_q_.count(trans.addr) == 0) {  // can not merge writes
             pending_wr_q_.insert(std::make_pair(trans.addr, trans));
             if (is_unified_queue_) {
@@ -176,6 +177,7 @@ bool Controller::AddTransaction(Transaction trans) {
         return_queue_.push_back(trans);
         return true;
     } else {  // read
+        std::cerr << "Controller is adding a READ" << std::endl;
         // if in write buffer, use the write buffer value
         if (pending_wr_q_.count(trans.addr) > 0) {
             trans.complete_cycle = clk_ + 1;
@@ -271,8 +273,27 @@ Command Controller::TransToCommand(const Transaction &trans) {
     if (row_buf_policy_ == RowBufPolicy::OPEN_PAGE) {
         cmd_type = trans.is_write ? CommandType::WRITE : CommandType::READ;
     } else {
-        cmd_type = trans.is_write ? CommandType::WRITE_PRECHARGE
-                                  : CommandType::READ_PRECHARGE;
+        //cmd_type = trans.is_write ? CommandType::WRITE_PRECHARGE
+        //                          : CommandType::READ_PRECHARGE;
+	std::cerr << "moo" << trans.is_write << std::endl;
+	switch (trans.is_write) {
+		case -2:
+			cmd_type = CommandType::READ_PRECHARGE;
+			std::cerr << "READ_PRECHARGE" << std::endl;
+			break;
+		case -1:
+			cmd_type = CommandType::READ;
+			std::cerr << "READ" << std::endl;
+			break;
+		case 1:
+			cmd_type = CommandType::WRITE;
+			std::cerr << "WRITE" << std::endl;
+			break;
+		case 2:
+			cmd_type = CommandType::WRITE_PRECHARGE;
+			std::cerr << "WRITE_PRECHARGE" << std::endl;
+			break;
+	}
     }
     return Command(cmd_type, addr, trans.addr);
 }

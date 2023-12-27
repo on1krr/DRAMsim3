@@ -1,6 +1,7 @@
 #include "common.h"
 #include "fmt/format.h"
 #include <sstream>
+#include <set>
 #include <unordered_set>
 #include <sys/stat.h>
 
@@ -33,11 +34,40 @@ std::ostream& operator<<(std::ostream& os, const Transaction& trans) {
 }
 
 std::istream& operator>>(std::istream& is, Transaction& trans) {
-    std::unordered_set<std::string> write_types = {"WRITE", "write", "P_MEM_WR",
+    //std::unordered_set<std::string> write_types = {"WRITE", "WRITE_P", "P_MEM_WR",
+    //std::set <std::string> write_types = {"WRITE", "WRITE_P", "P_MEM_WR",
+    std::vector <std::string> write_types = {"WRITE", "WRITE_P", "P_MEM_WR",
                                                    "BOFF"};
+    //std::unordered_set<std::string> read_types = {"READ", "READ_P"};
+    //std::set <std::string> read_types = {"READ", "READ_P"};
+    std::vector <std::string> read_types = {"READ", "READ_P"};
     std::string mem_op;
     is >> std::hex >> trans.addr >> mem_op >> std::dec >> trans.added_cycle;
-    trans.is_write = write_types.count(mem_op) == 1;
+    //trans.is_write = write_types.count(mem_op) + (read_types.count(mem_op) * -1);
+
+    int read_idx;
+    int write_idx;
+
+    auto read_op = std::find(read_types.begin(), read_types.end(), mem_op);
+    if (read_op == read_types.end())
+    {
+        read_idx = 0;
+    }else
+    {
+        read_idx = std::distance(read_types.begin(), read_op) + 1;
+    }
+    auto write_op = std::find(write_types.begin(), write_types.end(), mem_op);
+    if (write_op == write_types.end())
+    {
+        write_idx = 0;
+    }else
+    {
+        write_idx = std::distance(write_types.begin(), write_op) + 1;
+    }
+
+    trans.is_write = write_idx + (read_idx * -1);
+
+    std::cerr << trans.is_write << std::endl;
     return is;
 }
 
