@@ -63,6 +63,7 @@ std::pair<uint64_t, int> Controller::ReturnDoneTrans(uint64_t clk) {
 }
 
 void Controller::ClockTick() {
+    std::cerr << "In Controller:ClockTick" << std::endl;
     // update refresh counter
     refresh_.ClockTick();
 
@@ -149,6 +150,7 @@ void Controller::ClockTick() {
 }
 
 bool Controller::WillAcceptTransaction(uint64_t hex_addr, int is_write) const {
+    std::cerr << "In Controller:WillAcceptTransaction" << std::endl;
     if (is_unified_queue_) {
         return unified_queue_.size() < unified_queue_.capacity();
     } else if (is_write < 0) {
@@ -159,6 +161,7 @@ bool Controller::WillAcceptTransaction(uint64_t hex_addr, int is_write) const {
 }
 
 bool Controller::AddTransaction(Transaction trans) {
+    std::cerr << "In Controller:AddTransaction" << std::endl;
     trans.added_cycle = clk_;
     simple_stats_.AddValue("interarrival_latency", clk_ - last_trans_clk_);
     last_trans_clk_ = clk_;
@@ -197,6 +200,7 @@ bool Controller::AddTransaction(Transaction trans) {
 }
 
 void Controller::ScheduleTransaction() {
+    std::cerr << "In Controller::ScheduleTransaction" << std::endl;
     // determine whether to schedule read or write
     if (write_draining_ == 0 && !is_unified_queue_) {
         // we basically have a upper and lower threshold for write buffer
@@ -229,6 +233,7 @@ void Controller::ScheduleTransaction() {
 }
 
 void Controller::IssueCommand(const Command &cmd) {
+    std::cerr << "In Controller:IssueCommand" << std::endl;
 #ifdef CMD_TRACE
     cmd_trace_ << std::left << std::setw(18) << clk_ << " " << cmd << std::endl;
 #endif  // CMD_TRACE
@@ -268,6 +273,7 @@ void Controller::IssueCommand(const Command &cmd) {
 }
 
 Command Controller::TransToCommand(const Transaction &trans) {
+    std::cerr << "In Controller::TransToCommand" << std::endl;
     auto addr = config_.AddressMapping(trans.addr);
     CommandType cmd_type;
     if (row_buf_policy_ == RowBufPolicy::OPEN_PAGE) {
