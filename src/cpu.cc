@@ -63,19 +63,28 @@ TraceBasedCPU::TraceBasedCPU(const std::string& config_file,
                              const std::string& output_dir,
                              const std::string& trace_file)
     : CPU(config_file, output_dir) {
+	std::string line;
     trace_file_.open(trace_file);
     if (trace_file_.fail()) {
         std::cerr << "Trace file does not exist" << std::endl;
         AbruptExit(__FILE__, __LINE__);
     }
+    while (std::getline(trace_file_, line)) {
+      if (line.find("#") == 0) {
+        continue;
+      }
+      std::cout << line << std::endl;
+      trace_stream_ << line << std::endl;
+   }
+   trace_stream_.seekp(0);
 }
 
 void TraceBasedCPU::ClockTick() {
     memory_system_.ClockTick();
-    if (!trace_file_.eof()) {
+    if (!trace_stream_.eof()) {
         if (get_next_) {
             get_next_ = false;
-            trace_file_ >> trans_;
+            trace_stream_ >> trans_;
         }
         if (trans_.added_cycle <= clk_) {
             get_next_ = memory_system_.WillAcceptTransaction(trans_.addr,
