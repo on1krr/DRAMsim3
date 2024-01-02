@@ -20,6 +20,7 @@ enum class DRAMProtocol {
     LPDDR4,
     HBM,
     HBM2,
+    HBM3,
     HMC,
     SIZE
 };
@@ -153,7 +154,8 @@ class Config {
     }
     bool IsHBM() const {
         return (protocol == DRAMProtocol::HBM ||
-                protocol == DRAMProtocol::HBM2);
+                protocol == DRAMProtocol::HBM2 ||
+                protocol == DRAMProtocol::HBM3);
     }
     bool IsHMC() const { return (protocol == DRAMProtocol::HMC); }
     // yzy: add another function
